@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>MF TOURNAMENT | LIVE HUB</title>
+    <style>
+        /* Подключение топовых геймерских и интерфейсных шрифтов */
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Plus+Jakarta+Sans:wght@400;600;800&display=swap');
+
+        :root { 
+            --bg: #0a0a0a; 
+            --card: #141414; 
+            --card-hover: #1c1c1c;
+            --red: #ff3e3e; 
+            --orange: #ff9100; 
+            --text: #ffffff; 
+            --gray: #aaa;
+            --border: #2a2a2a;
+        }
+        body { 
+            background: radial-gradient(circle at top, #2d1b22 0%, #0a0a0a 70%); 
+            color: var(--text); 
+            font-family: 'Plus Jakarta Sans', system-ui, sans-serif; 
+            margin: 0; 
+            padding-bottom: 50px; 
+        }
+        
+        /* Навигационная панель */
+        .header-panel { display: flex; justify-content: space-between; align-items: center; padding: 20px 40px; background: rgba(0,0,0,0.5); border-bottom: 1px solid var(--border); }
+        .nav-tabs { display: flex; gap: 15px; }
+        .tab-btn { 
+            font-family: 'Orbitron', sans-serif;
+            background: #1a1a1a; 
+            border: 1px solid #444; 
+            color: white; 
+            padding: 10px 20px; 
+            cursor: pointer; 
+            border-radius: 6px; 
+            font-weight: bold; 
+            text-transform: uppercase; 
+            transition: 0.2s ease; 
+        }
+        .tab-btn.active { background: var(--red); border: none; }
+        .logo-text { font-family: 'Orbitron', sans-serif; font-size: 20px; font-weight: bold; letter-spacing: 2px; }
+
+        .container { max-width: 1200px; margin: 30px auto; padding: 0 20px; }
+        .content { display: none; }
+        .content.active { display: block; }
+
+        /* Баннер турнира во вкладке Команды */
+        .teams-banner { text-align: center; padding: 40px 20px; background: linear-gradient(180deg, rgba(255, 62, 62, 0.12) 0%, rgba(0,0,0,0) 100%); border: 1px solid var(--border); border-radius: 16px; margin-bottom: 40px; }
+        .banner-sub { font-family: 'Orbitron', sans-serif; font-size: 14px; color: #fff; letter-spacing: 6px; font-weight: 900; text-transform: uppercase; margin-bottom: 8px; opacity: 0.6; }
+        .banner-main { 
+            font-family: 'Orbitron', sans-serif; 
+            font-size: 38px; 
+            font-weight: 900; 
+            margin: 0; 
+            letter-spacing: 3px; 
+            text-transform: uppercase; 
+            background: linear-gradient(90deg, #ffea00 0%, #ff5100 100%); 
+            -webkit-background-clip: text; 
+            -webkit-text-fill-color: transparent; 
+        }
+
+        /* Новая нумерация над командами */
+        .team-squad-label {
+            font-family: 'Orbitron', sans-serif;
+            text-align: center;
+            font-size: 11px;
+            color: var(--orange);
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            margin-top: 50px;
+            margin-bottom: -32px;
+            font-weight: 700;
+            opacity: 0.8;
+        }
+
+        /* Вкладка: Команды */
+        .team-title { font-family: 'Orbitron', sans-serif; color: var(--red); font-size: 26px; font-weight: 900; margin: 40px 0 20px; text-align: center; text-transform: uppercase; letter-spacing: 2px; }
+        .grid { display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; }
+        
+        /* Прокачанная карточка игрока */
+        .player-card { 
+            position: relative;
+            background: var(--card); 
+            border: 1px solid var(--border); 
+            padding: 35px 15px 15px 15px; 
+            border-radius: 16px; 
+            width: 200px; 
+            text-align: center; 
+            transition: 0.3s cubic-bezier(0.25, 1, 0.5, 1); 
+        }
+        .player-card:hover { border-color: var(--red); transform: translateY(-4px); box-shadow: 0 10px 20px rgba(255, 62, 62, 0.1); }
+        
+        /* Абсолютные метки углов */
+        .player-tag {
+            position: absolute;
+            top: 14px;
+            left: 16px;
+            font-size: 10px;
+            font-weight: 800;
+            color: #555;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+        .captain-tag {
+            position: absolute;
+            top: 12px;
+            right: 16px;
+            font-size: 9px;
+            font-weight: 800;
+            color: #55ea55;
+            background: rgba(85, 234, 85, 0.12);
+            border: 1px solid rgba(85, 234, 85, 0.25);
+            padding: 2px 7px;
+            border-radius: 4px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        /* Увеличенные аватарки игроков как на скрине */
+        .player-img { width: 140px; height: 140px; border-radius: 14px; object-fit: cover; border: 2px solid #2a2a2a; margin-bottom: 12px; margin-top: 5px; }
+        
+        .name { font-weight: 800; margin-bottom: 10px; font-size: 16px; letter-spacing: 0.5px; }
+        .stat { display: flex; justify-content: space-between; font-size: 11px; color: var(--gray); margin: 5px 0; font-weight: 600; }
+        .val { color: var(--orange); font-weight: bold; }
+
+        /* Макет хаба предиктов */
+        .hub-layout { display: grid; grid-template-columns: 1fr 360px; gap: 30px; align-items: start; }
+        @media (max-width: 900px) { .hub-layout { grid-template-columns: 1fr; } }
+
+        .hub-title-block { margin-bottom: 25px; }
+        .hub-title-block h1 { font-family: 'Orbitron', sans-serif; margin: 0 0 5px 0; font-size: 28px; letter-spacing: 1px; }
+        .hub-title-block p { margin: 0; color: var(--gray); font-size: 14px; }
+
+        .section-box { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 20px; margin-bottom: 25px; }
+        .section-box h3 { font-family: 'Orbitron', sans-serif; margin-top: 0; font-size: 18px; border-bottom: 1px solid var(--border); padding-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
+        .section-box .sub-desc { font-size: 12px; color: var(--gray); margin:-5px 0 15px 0; }
+
+        /* Таблицы */
+        .hub-table { width: 100%; border-collapse: collapse; text-align: left; font-size: 14px; }
+        .hub-table th { color: var(--gray); font-weight: normal; padding: 10px 5px; border-bottom: 1px solid var(--border); }
+        .hub-table td { padding: 12px 5px; border-bottom: 1px solid #1f1f1f; }
+        .table-team-cell { display: flex; align-items: center; gap: 10px; font-weight: bold; }
+        .table-logo { width: 24px; height: 24px; border-radius: 4px; object-fit: cover; background: #222; }
+
+        /* Карточки матчей */
+        .match-card { background: #1a1a1a; border: 1px solid var(--border); border-radius: 12px; padding: 15px; margin-bottom: 15px; }
+        .match-meta { display: flex; justify-content: space-between; font-size: 11px; color: var(--gray); margin-bottom: 12px; text-transform: uppercase; }
+        .status-badge { padding: 2px 8px; border-radius: 10px; font-weight: bold; font-size: 10px; }
+        .status-badge.upcoming { background: rgba(255,145,0,0.15); color: var(--orange); }
+        .status-badge.scheduled { background: rgba(255,255,255,0.1); color: #888; }
+        
+        .match-teams { display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px; }
+        .match-team-display { flex: 1; display: flex; align-items: center; gap: 12px; font-weight: bold; font-size: 15px; }
+        .match-team-display.right { justify-content: flex-end; text-align: right; }
+        .match-logo { width: 44px; height: 44px; border-radius: 8px; background: #252525; object-fit: cover; padding: 3px; }
+        .match-score-center { font-family: 'Orbitron', sans-serif; font-size: 20px; font-weight: bold; letter-spacing: 3px; background: #222; padding: 4px 14px; border-radius: 6px; border: 1px solid #333; min-width: 40px; text-align: center; }
+
+        /* Элементы интерактивных предиктов */
+        .predict-selectors { border-top: 1px dashed var(--border); padding-top: 12px; margin-top: 10px; }
+        .predict-label { font-size: 12px; color: var(--gray); margin-bottom: 6px; font-weight: bold; }
+        .btn-row { display: flex; gap: 10px; margin-bottom: 12px; }
+        .pick-btn { flex: 1; background: #252525; border: 1px solid #3c3c3c; color: white; padding: 10px; cursor: pointer; border-radius: 6px; font-size: 13px; font-weight: bold; transition: 0.2s; text-transform: uppercase; }
+        .pick-btn:hover:not(:disabled) { border-color: var(--orange); }
+        .pick-btn.active { background: var(--red); border-color: var(--red); box-shadow: 0 0 8px rgba(255,62,62,0.3); }
+        
+        .fragger-select { width: 100%; background: #252525; color: white; border: 1px solid #3c3c3c; padding: 10px; border-radius: 6px; font-size: 13px; cursor: pointer; margin-bottom: 12px; }
+        .lock-btn { width: 100%; background: transparent; border: 1px solid var(--red); color: var(--red); padding: 10px; font-weight: bold; border-radius: 6px; cursor: pointer; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; transition: 0.2s; }
+        .lock-btn:hover:not(:disabled) { background: var(--red); color: white; }
+        .locked-status { font-size: 12px; color: #55ea55; text-align: center; font-weight: bold; background: rgba(85,234,85,0.1); padding: 8px; border-radius: 6px; border: 1px solid rgba(85,234,85,0.2); }
+
+        /* Предикты Турнира */
+        .tournament-grid { display: flex; flex-direction: column; gap: 15px; }
+        .tournament-row { background: #1a1a1a; border: 1px solid var(--border); border-radius: 12px; padding: 15px; display: flex; align-items: center; justify-content: space-between; gap: 20px; }
+        .tournament-info { display: flex; align-items: center; gap: 12px; min-width: 220px; }
+        .tournament-icon { font-size: 20px; }
+        .tournament-title-text { font-weight: bold; font-size: 14px; }
+        .tournament-select-wrapper { flex: 1; max-width: 350px; }
+
+        .rules-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #1f1f1f; font-size: 13px; }
+        .rules-badge { background: #222; border: 1px solid #444; color: var(--orange); font-weight: bold; padding: 2px 8px; border-radius: 4px; }
+
+        /* Стили вкладки Плей-офф */
+        .po-badge { display: inline-block; background: rgba(255, 62, 62, 0.15); color: var(--red); padding: 4px 12px; border-radius: 6px; font-size: 11px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 15px; border: 1px solid rgba(255, 62, 62, 0.3); }
+        .po-title { font-family: 'Orbitron', sans-serif; font-size: 32px; font-weight: 900; margin: 0 0 15px 0; letter-spacing: 1px; }
+        .po-title span { color: var(--orange); }
+        .po-desc { color: #ccc; font-size: 14px; line-height: 1.6; margin-bottom: 30px; max-width: 800px; }
+        .po-format-grid { display: flex; gap: 15px; margin-bottom: 35px; flex-wrap: wrap; }
+        .po-format-card { background: #1a1a1a; border: 1px solid var(--border); border-radius: 10px; padding: 15px; min-width: 140px; flex: 1; }
+        .po-format-label { font-size: 11px; color: var(--gray); text-transform: uppercase; margin-bottom: 6px; letter-spacing: 0.5px; }
+        .po-format-val { font-size: 16px; font-weight: bold; color: #fff; }
+        .po-info-row { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; border-top: 1px solid var(--border); padding-top: 30px; }
+        @media (max-width: 768px) { .po-info-row { grid-template-columns: 1fr; } }
+        .po-info-box h4 { margin: 0 0 8px 0; font-size: 16px; color: var(--orange); text-transform: uppercase; letter-spacing: 0.5px; }
+        .po-info-box .po-sub { font-size: 14px; font-weight: bold; color: #fff; margin-bottom: 8px; }
+        .po-info-box p { margin: 0; font-size: 13px; color: var(--gray); line-height: 1.6; }
+    </style>
+</head>
+<body>
+
+<div class="header-panel">
+    <div class="nav-tabs">
+        <button class="tab-btn active" id="btn-teams" onclick="show('teams')">КОМАНДЫ</button>
+        <button class="tab-btn" id="btn-predicts" onclick="show('predicts')">ПРЕДИКТЫ</button>
+        <button class="tab-btn" id="btn-playoff" onclick="show('playoff')">ПЛЕЙ-ОФФ</button>
+    </div>
+    <div class="logo-text">MF TOURNAMENT</div>
+</div>
+
+<div class="container">
+    <div id="teams" class="content active"></div>
+
+    <div id="playoff" class="content">
+        <div class="section-box" style="padding: 40px; position: relative; overflow: hidden;">
+            <div class="po-badge">Этап на выбывание</div>
+            <h1 class="po-title">PLAYOFF • <span>СКОРО СТАРТ</span></h1>
+            
+            <p class="po-desc">
+                Групповая стадия подходит к концу, и совсем скоро сильнейшие коллективы сразятся в бескомпромиссных матчах на выбывание. 
+                Сетка плей-офф и расписание финальных серий появятся сразу после определения всех участников.
+            </p>
+
+            <div class="po-format-grid">
+                <div class="po-format-card">
+                    <div class="po-format-label">Формат</div>
+                    <div class="po-format-val">Double Elim.</div>
+                </div>
+                <div class="po-format-card">
+                    <div class="po-format-label">Матчи</div>
+                    <div class="po-format-val">Best of 3</div>
+                </div>
+                <div class="po-format-card">
+                    <div class="po-format-label">Финал</div>
+                    <div class="po-format-val">Best of 5</div>
+                </div>
+            </div>
+
+            <div class="po-info-row">
+                <div class="po-info-box">
+                    <h4>Главная битва сезона</h4>
+                    <div class="po-sub">Финальный этап MF Tournament</div>
+                    <p>Следите за расписанием, результатами встреч и текстовыми трансляциями игр в реальном времени. Ошибки здесь недопустимы — проигравший покидает турнир.</p>
+                </div>
+                <div class="po-info-box">
+                    <h4>Что дальше</h4>
+                    <div class="po-sub">Добавьте страницу в закладки</div>
+                    <p>Как только определятся пары команд, здесь развернется интерактивная турнирная сетка с подробной статистикой каждой встречи.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="predicts" class="content">
+        <div class="hub-title-block">
+            <h1>LIVE ПРЕДИКТЫ</h1>
+            <p>Выбирай победителя матча, точный счёт серии и топ-фраггера, а затем отправляй предикт прямо из карточки.</p>
+        </div>
+
+        <div class="section-box" style="margin-bottom: 25px;">
+            <div class="predict-label" style="font-size: 13px; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px;">Формат • Выбери формат предиктов</div>
+            <div class="btn-row" style="max-width: 360px; margin: 0;">
+                <button class="pick-btn active" id="fmt-matches-btn" onclick="switchFormat('matches')">Матчи</button>
+                <button class="pick-btn" id="fmt-tournament-btn" onclick="switchFormat('tournament')">Турнир</button>
+            </div>
+        </div>
+
+        <div class="hub-layout">
+            <div class="hub-main-col">
+                
+                <div id="view-matches">
+                    <div class="section-box">
+                        <h3>Предстоящие матчи <span style="font-size:12px; font-weight:normal; color:var(--orange);">Доступно для заполнения</span></h3>
+                        <div class="sub-desc">Здесь матчи до старта. Для них можно заполнить и отправить предикт.</div>
+                        <div id="upcoming-list"></div>
+                    </div>
+
+                    <div class="section-box">
+                        <h3>Активные матчи</h3>
+                        <div id="active-list" style="font-size:13px; color:var(--gray);">Сейчас нет active-матчей.</div>
+                    </div>
+
+                    <div class="section-box">
+                        <h3>Завершённые матчи</h3>
+                        <div id="finished-list" style="font-size:13px; color:var(--gray);">Пока нет завершённых матчей.</div>
+                    </div>
+
+                    <div class="section-box">
+                        <h3>Запланированные матчи</h3>
+                        <div class="sub-desc">Здесь матчи запланированы, но предикт на них ещё не открыт.</div>
+                        <div id="scheduled-list"></div>
+                    </div>
+                </div>
+
+                <div id="view-tournament" style="display: none;">
+                    <div class="section-box">
+                        <h3>Турнир • Предикты турнира</h3>
+                        <div class="sub-desc" style="margin-bottom: 20px;">Глобальные долгосрочные прогнозы на итоги всего чемпионата. Подумай хорошенько перед сохранением!</div>
+                        
+                        <div class="tournament-grid" id="tournament-predicts-fields"></div>
+                        <div id="tournament-lock-zone" style="margin-top: 25px; border-top: 1px dashed var(--border); padding-top: 20px;"></div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="hub-sidebar">
+                <div class="section-box">
+                    <h3>Турнирная таблица</h3>
+                    <div class="sub-desc">Все 6 команд. Победа — 3 очка, поражение — 0.</div>
+                    <table class="hub-table">
+                        <thead>
+                            <tr>
+                                <th style="width:50px;">Место</th>
+                                <th>Команда</th>
+                                <th style="text-align:center;">В</th>
+                                <th style="text-align:center;">П</th>
+                                <th style="text-align:center; font-weight:bold; color:white;">Очки</th>
+                            </tr>
+                        </thead>
+                        <tbody id="standings-body"></tbody>
+                    </table>
+                </div>
+
+                <div class="section-box">
+                    <h3>Как считаются очки</h3>
+                    <div class="sub-desc">Система начисления баллов:</div>
+                    <div class="rules-row"><span>За верного победителя</span><span class="rules-badge">+2</span></div>
+                    <div class="rules-row"><span>За точный счёт серии (в BO3)</span><span class="rules-badge">+2</span></div>
+                    <div class="rules-row"><span>За лучшего топ-фраггера</span><span class="rules-badge">+1</span></div>
+                    <p style="font-size:11px; color:var(--gray); margin:10px 0 0 0; line-height:1.4;">
+                        Максимум за один матч: до 5 очков. В BO1 точный счёт подставляется автоматически.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // БАЗА ДАННЫХ КОМАНД И ИГРОКОВ (Dev1n и Quzzix поменялись местами)
+    const TEAMS_DATA = [
+        { name: "AMK", logo: "images/logos/amk.png", w: 0, l: 0, pts: 0, players: [
+            { n: "azbuca", r: "0.00", h: "1000+", s: "???", img: "images/azbuca.jpg" },
+            { n: "mamont_pirce", r: "0.95", h: "800+", s: "???", img: "images/mamont.jpg" },
+            { n: "Patoshka", r: "2.21", h: "2000+", s: "AWP", img: "images/patoshka.jpg" },
+            { n: "Megaglist", r: "0.60", h: "300+", s: "AK-47", img: "images/megaglist.jpg" }
+        ]},
+        { name: "CZ9", logo: "images/logos/cz9.png", w: 0, l: 0, pts: 0, players: [
+            { n: "Crazy_crib", r: "1.08", h: "730+", s: "AK-47", img: "images/crazy.jpg" },
+            { n: "Mexa", r: "0.78", h: "300+", s: "M4A1-S", img: "images/mexa.jpg" },
+            { n: "Egor T.", r: "0.00", h: "200+", s: "AK-47", img: "images/egor.jpg" },
+            { n: "Lam4uk", r: "1.05", h: "500+", s: "Desert Eagle", img: "images/lam4uk.jpg" }
+        ]},
+        { name: "DQTEAM", logo: "images/logos/dqteam.png", w: 0, l: 0, pts: 0, players: [
+            { n: "Dev1n", r: "0.70", h: "500+", s: "???", img: "images/dev1n.jpg" },
+            { n: "Quzzix", r: "1.36", h: "1000+", s: "AK-47", img: "images/quzzix.jpg" },
+            { n: "Little", r: "0.00", h: "65+", s: "???", img: "images/little.jpg" },
+            { n: "Davidosik", r: "0.00", h: "600+", s: "???", img: "images/davidosik.jpg" }
+        ]},
+        { name: "LOSSTEAM", logo: "images/logos/lossteam.png", w: 0, l: 0, pts: 0, players: [
+            { n: "Loss", r: "1.56", h: "1000+", s: "AK-47", img: "images/loss.jpg" },
+            { n: "han4k", r: "1.21", h: "675+", s: "AWP", img: "images/han4k.jpg" },
+            { n: "WIN_Dizel", r: "0.89", h: "430+", s: "MP9", img: "images/dizel.jpg" },
+            { n: "KriKkK", r: "0.00", h: "2800+", s: "Nova", img: "images/krikkk.jpg" }
+        ]},
+        { name: "PEPEVISION", logo: "images/logos/pepevision.png", w: 0, l: 0, pts: 0, players: [
+            { n: "ImNotDima", r: "0.96", h: "906+", s: "M4A1-S", img: "images/imnotdima.jpg" },
+            { n: "S1MP1K", r: "0.87", h: "800+", s: "AWP", img: "images/s1mp1k.jpg" },
+            { n: "Zero", r: "1.19", h: "400+", s: "AK-47", img: "images/zero.jpg" },
+            { n: "ds_swanson", r: "0.89", h: "790+", s: "M249", img: "images/swanson.jpg" }
+        ]},
+        { name: "ZBc", logo: "images/logos/zbc.png", w: 0, l: 0, pts: 0, players: [
+            { n: "Semen", r: "0.52", h: "400+", s: "MP7", img: "images/semen.jpg" },
+            { n: "Klat4er", r: "2.30", h: "2200+", s: "AK-47", img: "images/klat4er.jpg" },
+            { n: "strew", r: "0.76", h: "250+", s: "M4A1-S", img: "images/strew.jpg" },
+            { n: "igrok6574", r: "0.69", h: "950+", s: "AK-47", img: "images/igrok.jpg" }
+        ]}
+    ];
+
+    const MAPS_LIST = ["Mirage", "Nuke", "Inferno", "Ancient", "Anubis", "Vertigo", "Dust 2"];
+
+    const MATCHES_SCHEDULE = [
+        { id: "m1", round: "1 Тур", type: "BO1", date: "28 May 2026", t1: "PEPEVISION", t2: "LOSSTEAM", status: "upcoming", s1: 0, s2: 1 },
+        { id: "m2", round: "1 Тур", type: "BO1", date: "31 May 2026", t1: "CZ9", t2: "ZBc", status: "upcoming", s1: 1, s2: 0 },
+        { id: "m3", round: "1 Тур", type: "BO1", date: "1 Jun 2026", t1: "DQTEAM", t2: "AMK", status: "upcoming", s1: 0, s2: 1 },
+        { id: "m4", round: "2 Тур", type: "BO1", date: "? Jun 2026", t1: "LOSSTEAM", t2: "ZBc", status: "scheduled", s1: "-", s2: "-" },
+        { id: "m5", round: "2 Тур", type: "BO1", date: "? Jun 2026", t1: "PEPEVISION", t2: "DQTEAM", status: "scheduled", s1: "-", s2: "-" },
+        { id: "m6", round: "2 Тур", type: "BO1", date: "? Jun 2026", t1: "CZ9", t2: "AMK", status: "scheduled", s1: "-", s2: "-" }
+    ];
+
+    const TOURNAMENT_PREDICTS_CONFIG = [
+        { key: "trn_winner", label: "Победитель турнира", icon: "🏆", type: "teams" },
+        { key: "trn_mvp", label: "MVP турнира", icon: "⭐", type: "players" },
+        { key: "trn_best_kd", label: "Лучший K/D турнира", icon: "📈", type: "players" },
+        { key: "trn_worst_kd", label: "Худший K/D турнира", icon: "📉", type: "players" },
+        { key: "trn_top_fragger", label: "Топ-фраггер турнира", icon: "🔫", type: "players" },
+        { key: "trn_top_assist", label: "Топ-ассист турнира", icon: "🤝", type: "players" },
+        { key: "trn_popular_map", label: "Самая популярная карта", icon: "🗺️", type: "maps" },
+        { key: "trn_unpopular_map", label: "Самая непопулярная карта", icon: "🗺️", type: "maps" }
+    ];
+
+    function show(id) {
+        document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        document.getElementById('btn-' + id).classList.add('active');
+    }
+
+    function switchFormat(type) {
+        document.getElementById('fmt-matches-btn').classList.remove('active');
+        document.getElementById('fmt-tournament-btn').classList.remove('active');
+        document.getElementById('view-matches').style.display = 'none';
+        document.getElementById('view-tournament').style.display = 'none';
+
+        if (type === 'matches') {
+            document.getElementById('fmt-matches-btn').classList.add('active');
+            document.getElementById('view-matches').style.display = 'block';
+        } else {
+            document.getElementById('fmt-tournament-btn').classList.add('active');
+            document.getElementById('view-tournament').style.display = 'block';
+            renderTournamentPredicts();
+        }
+    }
+
+    // РЕНДЕР ТАБА КОМАНД (Надпись изменена на CAPTAIN)
+    const teamsCont = document.getElementById('teams');
+    
+    teamsCont.innerHTML = `
+        <div class="teams-banner">
+            <div class="banner-sub">SPRING BREAKOUT</div>
+            <h1 class="banner-main">MF&sg TOURNAMENT №3</h1>
+        </div>
+    `;
+
+    const getTeamPriority = (name) => {
+        if (name === "AMK") return 1;
+        if (name === "DQTEAM") return 2;
+        return 3;
+    };
+
+    const sortedTeams = [...TEAMS_DATA].sort((a, b) => {
+        const pA = getTeamPriority(a.name);
+        const pB = getTeamPriority(b.name);
+        if (pA !== pB) return pA - pB;
+        return a.name.localeCompare(b.name);
+    });
+
+    sortedTeams.forEach((team, idx) => {
+        const teamNum = String(idx + 1).padStart(2, '0');
+
+        teamsCont.innerHTML += `
+            <div class="team-squad-label">Team ${teamNum} • Squad</div>
+            <div class="team-title">Team • ${team.name}</div>
+            <div class="grid">${team.players.map((p, pIdx) => `
+                <div class="player-card">
+                    <div class="player-tag">player</div>
+                    ${pIdx === 0 ? `<div class="captain-tag">captain</div>` : ''}
+                    <img src="images/${p.n.toLowerCase().replace(/_/g, '-')}.jpg" 
+                    class="player-img" 
+                    onerror="this.src='images/default.jpg'">
+                    <div class="name">${p.n}</div>
+                    <div class="stat">Rating 2.0 <span class="val">${p.r}</span></div>
+                    <div class="stat">Playtime <span class="val">${p.h} hrs</span></div>
+                    <div class="stat">Signature <span class="val">${p.s}</span></div>
+                </div>`).join('')}
+            </div>`;
+    });
+
+    // Рендер турнирной таблицы
+    function renderStandings() {
+        const tbody = document.getElementById('standings-body');
+        tbody.innerHTML = "";
+        const sorted = [...TEAMS_DATA].sort((a,b) => b.pts - a.pts || a.name.localeCompare(b.name));
+        sorted.forEach((team, idx) => {
+            tbody.innerHTML += `
+                <tr>
+                    <td style="font-weight:bold; color:var(--gray);">#${idx + 1}</td>
+                    <td>
+                        <div class="table-team-cell">
+                            <img src="${team.logo}" class="table-logo" onerror="this.src='images/logos/default.png'">
+                            <span>${team.name}</span>
+                        </div>
+                    </td>
+                    <td style="text-align:center;">${team.w}</td>
+                    <td style="text-align:center;">${team.l}</td>
+                    <td style="text-align:center; font-weight:bold; color:var(--orange);">${team.pts}</td>
+                </tr>`;
+        });
+    }
+
+    // Предикты матчей
+    function selectWinner(matchId, chosenTeam) {
+        if (localStorage.getItem(`locked_${matchId}`)) return;
+        localStorage.setItem(`winner_${matchId}`, chosenTeam);
+        document.querySelectorAll(`[data-m-win="${matchId}"]`).forEach(b => b.classList.remove('active'));
+        event.target.classList.add('active');
+    }
+
+    function selectFragger(matchId, player) {
+        if (localStorage.getItem(`locked_${matchId}`)) return;
+        localStorage.setItem(`fragger_${matchId}`, player);
+    }
+
+    function lockPredict(matchId) {
+        if (!localStorage.getItem(`winner_${matchId}`)) { alert("Сначала выберите победителя матча!"); return; }
+        localStorage.setItem(`locked_${matchId}`, true);
+        renderMatches();
+    }
+
+function renderMatches() {
+    const upcomingCont = document.getElementById('upcoming-list');
+    upcomingCont.innerHTML = "";
+
+    MATCHES_SCHEDULE.filter(m => m.status === 'upcoming').forEach(m => {
+        const t1Obj = TEAMS_DATA.find(t => t.name === m.t1);
+        const t2Obj = TEAMS_DATA.find(t => t.name === m.t2);
+        
+        // Собираем всех игроков обоих команд в один список
+        const allPlayers = [...(t1Obj?.players || []), ...(t2Obj?.players || [])];
+        
+        const isLocked = localStorage.getItem(`locked_${m.id}`);
+        const savedWinner = localStorage.getItem(`winner_${m.id}`);
+        const savedFragger = localStorage.getItem(`fragger_${m.id}`);
+
+        const htmlCard = `
+            <div class="match-card">
+                <div class="match-meta"><span>${m.type} • ${m.round} • ${m.date}</span></div>
+                <div class="match-teams">
+                    <div class="match-team-display">
+                        <img src="images/logos/${m.t1.toLowerCase()}.png" class="match-logo" onerror="this.src='images/logos/default.png'">
+                        <span>${m.t1}</span>
+                    </div>
+                    <div class="match-score-center">VS</div>
+                    <div class="match-team-display right">
+                        <span>${m.t2}</span>
+                        <img src="images/logos/${m.t2.toLowerCase()}.png" class="match-logo" onerror="this.src='images/logos/default.png'">
+                    </div>
+                </div>
+                
+                <div class="predict-selectors">
+                    <div class="predict-label">Кто выиграет в матче?</div>
+                    <div class="btn-row">
+                        <button class="pick-btn ${savedWinner === m.t1 ? 'active' : ''}" onclick="selectWinner('${m.id}', '${m.t1}')">${m.t1}</button>
+                        <button class="pick-btn ${savedWinner === m.t2 ? 'active' : ''}" onclick="selectWinner('${m.id}', '${m.t2}')">${m.t2}</button>
+                    </div>
+                    
+                    <div class="predict-label">Кто набьет больше всего киллов?</div>
+                    <select class="fragger-select" onchange="localStorage.setItem('fragger_${m.id}', this.value)" ${isLocked ? 'disabled' : ''}>
+                        <option value="">Выберите игрока</option>
+                        ${allPlayers.map(p => `
+                            <option value="${p.n}" ${savedFragger === p.n ? 'selected' : ''}>
+                                ${p.n} (${TEAMS_DATA.find(t => t.players.includes(p))?.name})
+                            </option>
+                        `).join('')}
+                    </select>
+                    
+                    <button class="lock-btn" onclick="lockPredict('${m.id}')" ${isLocked ? 'disabled' : ''}>
+                        ${isLocked ? 'Предикт принят' : 'Подтвердить прогноз'}
+                    </button>
+                </div>
+            </div>`;
+        upcomingCont.innerHTML += htmlCard;
+    });
+}
+
+    // Предикты турнира
+    function saveTournamentValue(key, val) {
+        if (localStorage.getItem('trn_all_locked')) return;
+        localStorage.setItem(key, val);
+    }
+
+    function lockTournamentPredicts() {
+        let allFilled = true;
+        TOURNAMENT_PREDICTS_CONFIG.forEach(cfg => {
+            if (!localStorage.getItem(cfg.key)) allFilled = false;
+        });
+        if (!allFilled) { alert("Заполните все поля перед сохранением!"); return; }
+        localStorage.setItem('trn_all_locked', true);
+        renderTournamentPredicts();
+    }
+
+    function renderTournamentPredicts() {
+        const fieldsCont = document.getElementById('tournament-predicts-fields');
+        const lockZone = document.getElementById('tournament-lock-zone');
+        fieldsCont.innerHTML = "";
+        const isTrnLocked = localStorage.getItem('trn_all_locked');
+
+        const allTeamsOptions = TEAMS_DATA.map(t => `<option value="${t.name}">${t.name}</option>`).join('');
+        let allPlayersOptions = "";
+        TEAMS_DATA.forEach(t => t.players.forEach(p => { allPlayersOptions += `<option value="${p.n}">${p.n} (${t.name})</option>`; }));
+        const allMapsOptions = MAPS_LIST.map(m => `<option value="${m}">${m}</option>`).join('');
+
+        TOURNAMENT_PREDICTS_CONFIG.forEach(cfg => {
+            const savedVal = localStorage.getItem(cfg.key) || "";
+            let currentOptions = `<option value="">Нажмите, чтобы выбрать</option>`;
+            if (cfg.type === 'teams') currentOptions += allTeamsOptions;
+            else if (cfg.type === 'players') currentOptions += allPlayersOptions;
+            else if (cfg.type === 'maps') currentOptions += allMapsOptions;
+
+            if (savedVal) currentOptions = currentOptions.replace(`value="${savedVal}"`, `value="${savedVal}" selected`);
+
+            fieldsCont.innerHTML += `
+                <div class="tournament-row">
+                    <div class="tournament-info">
+                        <span class="tournament-icon">${cfg.icon}</span>
+                        <span class="tournament-title-text">${cfg.label}</span>
+                    </div>
+                    <div class="tournament-select-wrapper">
+                        <select class="fragger-select" style="margin:0;" ${isTrnLocked ? 'disabled' : ''} onchange="saveTournamentValue('${cfg.key}', this.value)">
+                            ${currentOptions}
+                        </select>
+                    </div>
+                </div>`;
+        });
+
+        if (isTrnLocked) {
+            lockZone.innerHTML = `<div class="locked-status" style="font-size:14px; padding:12px;">Предикт турнира сохранён.</div>`;
+        } else {
+            lockZone.innerHTML = `<button class="lock-btn" style="padding:12px;" onclick="lockTournamentPredicts()">Сохранить предикты турнира</button>`;
+        }
+    }
+
+    renderStandings();
+    renderMatches();
+</script>
+
+</body>
+</html>
